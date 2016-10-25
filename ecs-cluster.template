@@ -171,7 +171,9 @@
       "Properties": {
         "CidrBlock": {
           "Fn::FindInMap": ["VpcCidrs", "vpc", "cidr"]
-        }
+        },
+        "EnableDnsSupport": "true",
+        "EnableDnsHostnames": "true"
       }
     },
     "PubSubnetAz1": {
@@ -184,6 +186,7 @@
         "CidrBlock": {
           "Fn::FindInMap": ["VpcCidrs", "pubsubnet1", "cidr"]
         },
+        "MapPublicIpOnLaunch": "true",
         "AvailabilityZone": {
           "Fn::If": [
             "UseSpecifiedVpcAvailabilityZones",
@@ -219,6 +222,7 @@
         "CidrBlock": {
           "Fn::FindInMap": ["VpcCidrs", "pubsubnet2", "cidr"]
         },
+        "MapPublicIpOnLaunch": "true",
         "AvailabilityZone": {
           "Fn::If": [
             "UseSpecifiedVpcAvailabilityZones",
@@ -512,6 +516,38 @@
           }
         ]
       }
+    }
+  },
+  "Outputs": {
+    "VpcId": {
+      "Description": "The VPC ID of the VPC",
+      "Value": { "Ref" : "Vpc" },
+      "Export": { "Name" : {"Fn::Sub": "${AWS::StackName}-VPCID"}}
+    },
+    "KeyName": {
+      "Description": "The name of SSH key",
+      "Value": { "Ref" : "KeyName"},
+      "Export": { "Name" : {"Fn::Sub": "${AWS::StackName}-KeyName"}}
+    },
+    "SubnetA": {
+      "Description": "The ID of subnet A",
+      "Value": {"Ref":"PubSubnetAz1"},
+      "Export": { "Name" : {"Fn::Sub": "${AWS::StackName}-SubnetA"}}
+    },
+    "SubnetB": {
+      "Description": "The ID of subnet B",
+      "Value": {"Ref":"PubSubnetAz2"},
+      "Export": { "Name" : {"Fn::Sub":"${AWS::StackName}-SubnetB"}}
+    },
+    "AvailabilityZone1": {
+      "Description": "AZ 1",
+      "Value": {"Fn::GetAtt":["PubSubnetAz1","AvailabilityZone"]},
+      "Export": { "Name" : {"Fn::Sub": "${AWS::StackName}-AZ1"}}
+    },
+    "AvailabilityZone2": {
+      "Description": "AZ 2",
+      "Value": {"Fn::GetAtt":["PubSubnetAz2","AvailabilityZone"]},
+      "Export": { "Name" : {"Fn::Sub": "${AWS::StackName}-AZ2"}}
     }
   }
 }

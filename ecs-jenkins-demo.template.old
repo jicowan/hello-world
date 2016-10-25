@@ -21,6 +21,18 @@
       "Default" : "EcsClusterStack"
     },
 
+    "KeyName": {
+      "Description": "The EC2 Key Pair to allow SSH access to the instances",
+      "Type": "AWS::EC2::KeyPair::KeyName",
+      "ConstraintDescription": "must be the name of an existing EC2 KeyPair."
+    },
+
+    "VpcId": {
+      "Description": "The VPC Id to create the Security Group in.",
+      "Type": "AWS::EC2::VPC::Id",
+      "ConstraintDescription": "must be the name of an existing VPC."
+    },
+
     "SSHLocation": {
       "Description": "The IP address range that can be used to SSH to the EC2 instances",
       "Type": "String",
@@ -29,6 +41,18 @@
       "Default": "0.0.0.0/0",
       "AllowedPattern": "(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})\\.(\\d{1,3})/(\\d{1,2})",
       "ConstraintDescription": "must be a valid IP CIDR range of the form x.x.x.x/x."
+    },
+
+    "PublicSubnets": {
+      "Description": "List of Subnets to deploy the ELB and Instances into",
+      "Type": "List<AWS::EC2::Subnet::Id>",
+      "ConstraintDescription": "Must be a valid list of VPC Subnets."
+    },
+
+    "AutoscalingGroupAZs": {
+      "Description": "List of availability zones for the Autoscaling group",
+      "Type": "CommaDelimitedList",
+      "ConstraintDescription": "Must be a valid list of Availabilty Zones that match the AZs of the PublicSubnets list."
     }
 
   },
@@ -102,7 +126,6 @@
             "Action": ["sts:AssumeRole"]
           }]
         },
-        "ManagedPolicyArns":["arn:aws:iam::aws:policy/AmazonEC2ContainerServiceFullAccess","arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"],
         "Path": "/",
         "Policies": [{
           "PolicyName": "JenkinsRolePolicy",
@@ -137,8 +160,12 @@
     "WebServerGroup": {
       "Type": "AWS::AutoScaling::AutoScalingGroup",
       "Properties": {
-        "AvailabilityZones": [{"Fn::ImportValue": {"Fn::Sub": "${EcsStackName}-AZ1"}},{"Fn::ImportValue": {"Fn::Sub": "${EcsStackName}-AZ2"}}],
-        "VPCZoneIdentifier": [{"Fn::ImportValue": {"Fn::Sub": "${EcsStackName}-SubnetA"}},{"Fn::ImportValue": {"Fn::Sub": "${EcsStackName}-SubnetB"}}],
+        "AvailabilityZones": {
+          "Ref": "AutoscalingGroupAZs"
+        },
+        "VPCZoneIdentifier": {
+          "Ref": "PublicSubnets"
+        },
         "LaunchConfigurationName": {
           "Ref": "LaunchConfig"
         },
@@ -402,7 +429,7 @@
 
       "Properties": {
         "KeyName": {
-          "Fn::ImportValue": {"Fn::Sub": "${EcsStackName}-KeyName"}
+          "Ref": "KeyName"
         },
         "ImageId": {
           "Fn::FindInMap": ["AWSRegionArch2AMI", {
@@ -497,7 +524,7 @@
       "Properties": {
         "GroupDescription": "Enable SSH access and HTTP from anywhere",
         "VpcId": {
-          "Fn::ImportValue": {"Fn::Sub": "${EcsStackName}-VPCID"}
+          "Ref": "VpcId"
         },
         "SecurityGroupIngress": [{
           "IpProtocol": "tcp",
