@@ -6,14 +6,19 @@
       "vpc": {"cidr" : "10.0.0.0/16"},
       "pubsubnet1": {"cidr" : "10.0.0.0/24"},
       "pubsubnet2": {"cidr" :"10.0.1.0/24"}
+    },
+    "AWSRegionToAMI" : {
+      "us-east-1"      : { "AMIID" : "ami-40286957" },
+      "us-west-1"      : { "AMIID" : "ami-20fab440" },
+      "us-west-2"      : { "AMIID" : "ami-562cf236" },
+      "eu-west-1"      : { "AMIID" : "ami-175f1964" },
+      "eu-central-1"   : { "AMIID" : "ami-c55ea2aa" },
+      "ap-northeast-1" : { "AMIID" : "ami-010ed160" },
+      "ap-southeast-1" : { "AMIID" : "ami-438b2f20" },
+      "ap-southeast-2" : { "AMIID" : "ami-862211e5" }
     }
   },
-  "Parameters": {
-    "EcsAmiId": {
-      "Type": "String",
-      "Description": "ECS EC2 AMI id",
-      "Default": ""
-    },
+  "Parameters": {    
     "EcsInstanceType": {
       "Type": "String",
       "Description": "ECS EC2 instance type",
@@ -106,7 +111,7 @@
     "EcsCluster" : {
       "Type" : "String",
       "Description" : "ECS Cluster Name",
-      "Default" : "default"
+      "Default" : "getting-started"
     }
   },
   "Conditions": {
@@ -311,6 +316,12 @@
         }
       }
     },
+    "EcsClusterResource": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties": {
+        "ClusterName": {"Ref": "EcsCluster"}
+      }
+    },
     "EcsSecurityGroup": {
       "Condition": "CreateSecurityGroup",
       "Type": "AWS::EC2::SecurityGroup",
@@ -375,9 +386,9 @@
       "Condition": "CreateEC2LCWithKeyPair",
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
-	"ImageId": { "Ref" : "EcsAmiId" },
+	"ImageId": { "Fn::FindInMap" : [ "AWSRegionToAMI", { "Ref" : "AWS::Region" }, "AMIID" ] },
         "InstanceType": {
-          "Ref": "EcsInstanceType"
+          "Ref" : "EcsInstanceType"
         },
         "AssociatePublicIpAddress": true,
         "IamInstanceProfile": {
@@ -418,7 +429,7 @@
       "Condition": "CreateEC2LCWithoutKeyPair",
       "Type": "AWS::AutoScaling::LaunchConfiguration",
       "Properties": {
-	"ImageId": { "Ref" : "EcsAmiId" },
+	"ImageId": { "Fn::FindInMap" : [ "AWSRegionToAMI", { "Ref" : "AWS::Region" }, "AMIID" ] },
         "InstanceType": {
           "Ref": "EcsInstanceType"
         },
