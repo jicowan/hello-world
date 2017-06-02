@@ -213,7 +213,8 @@
                 "git": [],
                 "docker": [],
                 "httpd-tools": [],
-                "jq": []
+                "jq": [],
+                "java-1.8.0-openjdk.x86_64": []
               }
             },
             "services": {
@@ -444,6 +445,7 @@
               " --region ", {
                 "Ref": "AWS::Region"
               }, "\n",
+              "yum remove -y java-1.7.0\n",
 
               "# Install Jenkins\n",
               "wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo\n",
