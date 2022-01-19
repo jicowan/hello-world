@@ -102,7 +102,7 @@
             "Action": ["sts:AssumeRole"]
           }]
         },
-        "ManagedPolicyArns":["arn:aws:iam::aws:policy/AmazonEC2ContainerServiceFullAccess","arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"],
+        "ManagedPolicyArns":["arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccesss","arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryFullAccess"],
         "Path": "/",
         "Policies": [{
           "PolicyName": "JenkinsRolePolicy",
@@ -448,9 +448,11 @@
               "yum remove -y java-1.7.0\n",
 
               "# Install Jenkins\n",
-              "wget -O /etc/yum.repos.d/jenkins.repo http://pkg.jenkins-ci.org/redhat/jenkins.repo\n",
-              "rpm --import http://pkg.jenkins-ci.org/redhat/jenkins-ci.org.key\n",
-              "yum install -y jenkins\n",
+              "sudo wget -O /etc/yum.repos.d/jenkins.repo https://pkg.jenkins.io/redhat-stable/jenkins.repo \n",
+              "sudo rpm --import https://pkg.jenkins.io/redhat-stable/jenkins.io.key \n",
+              "yum install epel-release \n",
+              "sudo amazon-linux-extras install epel -y \n",
+              "yum install jenkins -y \n",
 
               "# Add Jenkins user to Docker group\n",
               "usermod -a -G docker jenkins\n",
